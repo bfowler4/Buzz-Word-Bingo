@@ -8,19 +8,6 @@ module.exports = {
 const success = { 'success': true };
 const failure = { 'success': false };
 
-function addBuzzWord(buzzWordObject, req, res) {
-  let buzzWords = req.app.locals.buzzWords;
-  if (buzzWords.length < 5) {
-    if (indexOfBuzzWord(buzzWordObject.buzzWord, buzzWords) === -1) {
-      buzzWords.push(buzzWordObject);
-      res.json(success);
-      return true;
-    }
-  }
-  res.json(failure);
-  return false;
-}
-
 function checkBuzzWordObject(buzzWordObject) {
   if (Object.keys(buzzWordObject).length === 2) {
     if (buzzWordObject.hasOwnProperty(`buzzWord`) && buzzWordObject.hasOwnProperty(`points`)) {
@@ -42,14 +29,32 @@ function indexOfBuzzWord(word, buzzWords) {
   return -1;
 }
 
+function addBuzzWord(buzzWordObject, req, res) {
+  if (checkBuzzWordObject(req.body)) {
+    let buzzWords = req.app.locals.buzzWords;
+    if (buzzWords.length < 5) {
+      if (indexOfBuzzWord(buzzWordObject.buzzWord, buzzWords) === -1) {
+        buzzWords.push(buzzWordObject);
+        return res.json(success);
+      }
+    }
+  }
+  return res.json(failure);
+}
+
 function updateBuzzWord(buzzWordObject, req, res) {
-  let buzzWords = req.app.locals.buzzWords;
-  let word = buzzWordObject.buzzWord;
-  let points = buzzWordObject.points;
-  let index = indexOfBuzzWord(word, buzzWords);
-  
-  buzzWords[index].points = points;
-  res.json(success);
+  if (checkBuzzWordObject(req.body)) {
+    if (indexOfBuzzWord(req.body.buzzWord, req.app.locals.buzzWords) > -1) {
+      let buzzWords = req.app.locals.buzzWords;
+      let word = buzzWordObject.buzzWord;
+      let points = buzzWordObject.points;
+      let index = indexOfBuzzWord(word, buzzWords);
+      
+      buzzWords[index].points = points;
+      return res.json(success);
+    }
+  }
+  return res.json(failure);
 }
 
 function deleteBuzzWord(req, res) {
@@ -59,8 +64,7 @@ function deleteBuzzWord(req, res) {
 
   if (index > -1) {
     buzzWords.splice(index, 1);
-    res.json(success);
-    return;
+    return res.json(success);
   }
-  res.json(failure);
+  return res.json(failure);
 }

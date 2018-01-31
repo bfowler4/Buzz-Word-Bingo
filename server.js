@@ -17,13 +17,13 @@ server.use(bodyParser.urlencoded({ extended: true }));
 server.use(`/buzzWords`, buzzWordsRoute);
 
 server.get(`/`, (req, res) => {
-  res.sendFile(__dirname + `/public/index.html`);
+  return res.sendFile(__dirname + `/public/index.html`);
 });
 
 server.get(`/reset`, (req, res) => {
   buzzWords.length = 0;
   totalScore = 0;
-  res.json(success);
+  return res.json(success);
 });
 
 server.post(`/heard`, (req, res) => {
@@ -31,9 +31,9 @@ server.post(`/heard`, (req, res) => {
   let index = indexOfBuzzWord(word, buzzWords);
   if (index > -1) {
     totalScore += buzzWords[index].points;
-    res.json({ 'totalScore': totalScore });
+    return res.json({ 'totalScore': totalScore });
   } else {
-    res.json(failure);
+    return res.json(failure);
   }
 });
 
