@@ -4,11 +4,13 @@ const bodyParser = require('body-parser');
 const buzzWords = [];
 let totalScore = 0;
 const buzzWordsRoute = require(`./routes/buzzWords.js`);
+const { indexOfBuzzWord } = require(`./helperFunctions.js`);
+const success = { 'success': true };
+const failure = { 'success': false };
 
 const PORT = process.env.PORT || 8080;
 
 server.locals.buzzWords = buzzWords;
-server.locals.totalScore = totalScore;
 
 server.use(bodyParser.urlencoded({ extended: true }));
 
@@ -18,9 +20,22 @@ server.get(`/`, (req, res) => {
   res.sendFile(__dirname + `/public/index.html`);
 });
 
+server.get(`/reset`, (req, res) => {
+  buzzWords.length = 0;
+  totalScore = 0;
+  res.json(success);
+});
 
-
-
+server.post(`/heard`, (req, res) => {
+  let word = req.body.buzzWord;
+  let index = indexOfBuzzWord(word, buzzWords);
+  if (index > -1) {
+    totalScore += buzzWords[index].points;
+    res.json({ 'totalScore': totalScore });
+  } else {
+    res.json(failure);
+  }
+});
 
 server.listen(PORT, (err) => {
   if (err) {
@@ -29,7 +44,3 @@ server.listen(PORT, (err) => {
     console.log(`Server listening on port: ${PORT}.`);
   }
 });
-
-function getBuzzWord(word) {
-
-}
